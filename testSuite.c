@@ -14,10 +14,10 @@ void function_one(void *arg){
 }
 void function_two(void *arg){
 	uint32_t i = (uint32_t)arg;
+	printf("OUTPUT: Trying to aqcuire semaphore (Task %d)\n", i);
+	wait(&semOne);
 	while(1){
-		printf("OUTPUT: Trying to aqcuire semaphore (Task %d)\n", i);
-		wait(&semOne);
-		printf("OUTPUT: Semaphore aquired (Task %d)\n", i);
+		function_one(arg);
 	}	
 }
 
@@ -74,7 +74,6 @@ void test_two(void){
 			CreateTask(&function_one, (priority_t)4, (void *)2);
 			task2Created = true;
 		}
-		
 		printf("FUNCTION TASK OUTPUT: (Task %d)\n", 5);
 	}
 }
@@ -83,11 +82,12 @@ void test_three(void){
 	bool task0Created = false;
 	bool task1Created = false;
 	semOne = newSem(1);
+	
+	printf("OUTPUT: Trying to aqcuire semaphore (Task %d)\n", 5);
+	wait(&semOne);
+	printf("OUTPUT: Semaphore aquired (Task %d)\n", 5);	
 
 	while(true){
-		printf("OUTPUT: Trying to aqcuire semaphore (Task %d)\n", 5);
-		wait(&semOne);
-		printf("OUTPUT: Semaphore aquired (Task %d)\n", 5);	
 
 		if(msTicks > 2000 && !task0Created){
 			// Create task of higher priority that tries to aquire semaphore
@@ -99,6 +99,8 @@ void test_three(void){
 			printf("OUTPUT: Signal sempaphore (Task %d)\n", 5);	
 			signal(&semOne);
 		}
+		
+		printf("FUNCTION TASK OUTPUT: (Task %d)\n", 5);
 	}
 }
 
