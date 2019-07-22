@@ -401,14 +401,14 @@
               <FilePath>.\uart.c</FilePath>
             </File>
             <File>
-              <FileName>ourRtos.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\ourRtos.h</FilePath>
-            </File>
-            <File>
               <FileName>ourRtos.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\ourRtos.c</FilePath>
+            </File>
+            <File>
+              <FileName>testSuite.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\testSuite.c</FilePath>
             </File>
           </Files>
         </Group>
