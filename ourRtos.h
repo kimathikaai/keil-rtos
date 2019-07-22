@@ -60,9 +60,9 @@ typedef struct{
 }sem_t;
 
 typedef struct{
-	int32_t s;
-	tcb_t* waitlist;
-	tcb_t* owner;
+	int32_t count;
+	tcb* waitList;
+	int16_t ownerId;
 }mutex_t;
 
 /*****************************************************************************

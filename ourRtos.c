@@ -112,7 +112,7 @@ void signal(sem_t * sem){
 	sem->s+=1;
 	if(sem->s <= 0){
 		// Unblock a task
-		if(sem->waitList == NULL)	printf("no tasks to unblock");	// This should never happen prob?
+		if(sem->waitList == NULL)	printf("no tasks to unblock\n");	// This should never happen prob?
 		else{
 			tcb_t * temp = sem->waitList;
 			sem->waitList = sem->waitList->next;
@@ -120,6 +120,86 @@ void signal(sem_t * sem){
 		}		
 	}
 	__enable_irq();
+}
+
+// MUTEX CREATE
+mutex_t newMutex(){
+	mutex_t mutex;
+	mutex.count = 1;
+	mutex.waitList = NULL;
+	mutex.ownerId = -1;	// default value for ownerless mutex
+	return mutex;
+}
+
+// MUTEX AQUIRE
+void mutexAcquire(mutex_t *mutex){	// Maybe make return type int so we know when errors occur, instead of just print statements?
+	__disable_irq();
+	mutex->count-=1;
+	if(mutex->count == 0)
+		mutex->ownerId = running->taskId;
+	if(mutex->count < 0){
+		// Block task that is trying to call wait (running task)
+		// first find tail of semaphore wait list
+		if(mutex->waitList == NULL){
+			mutex->waitList = running;
+		}
+		else{
+			tcb_t * curr = mutex->waitList;
+			while(curr->next != NULL){
+				curr = curr->next;
+			}
+			curr->next = running;
+		}
+		running->next = NULL;
+		running->taskState=Blocked;
+		
+		// Implement Priority inheritance here: set the task that has the mutex to the same priority of this task. After setting setNewRunning, the mutex owner will hopefully run and release the mutex.
+		if(mutex->ownerId == running->taskId)	printf("ERROR: Mutex owner is trying to aquire mutex again");	// Sanity check, this shouldn't happen
+		if(running->priority > tcb[mutex->ownerId].priority){
+			// Upgrade the priority of the mutex owner TEMPORARILY (to the priority of the task currently being blocked or the priority of the highest priority task on the waitList? look at class notes)
+			printf("Upgrade Priority of task %d\n", mutex->ownerId);
+		}
+		else
+			printf("Possible error: running task has lower priority than than the mutex-owning task");	// Probably shouldn't happen?
+		
+		// running task is now in the waitlist, but still technically running. Set setNewRunning so that during the next systick a new task will run.
+		setNewRunning = true;
+	}
+	else
+		printf("ERROR: mutex count was larger than one before decrementing\n")
+	__enable_irq();
+}
+
+// MUTEX RELEASE
+int mutexRelease(mutex_t *mutex){
+	__disable_irq();
+	if(running->taskId != mutex->ownerId){
+		printf("running task is not the mutex owner, unable to release!\n")
+		__enable_irq();
+		return -1;	// Use this return value in application code somehow?
+	}
+		
+	mutex->count+=1;
+	if(mutex->count <= 0){
+		// Unblock a task
+		if(mutex->waitList == NULL)	printf("no tasks to unblock");	// This should never happen prob?
+		else{
+			tcb_t * temp = mutex->waitList;
+			mutex->waitList = mutex->waitList->next;
+			add_to_readyList(temp);
+			// Set the newly unblocked task as the mutex owner
+			mutex->ownerId = temp->taskId;
+		}		
+	}
+	else if(mutex->count = 1){
+		// mutex is now ownerless
+		mutex->ownerId = -1;
+	}
+	else{
+		printf("ERROR:mutex count is greater than 1");
+	}
+	__enable_irq();
+	return 0;
 }
 
 // RTOS INITIALIZATION
