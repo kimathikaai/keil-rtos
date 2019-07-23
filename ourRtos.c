@@ -86,6 +86,7 @@ void wait(sem_t* sem){
 	sem->s-=1;
 	if(sem->s < 0){
 		// Block task that is trying to call wait (running task)
+		printf("Blocking task %d\n", running->taskId);
 		// first find tail of semaphore wait list
 		if(sem->waitList == NULL){
 			sem->waitList = running;
@@ -123,7 +124,7 @@ void signal(sem_t * sem){
 }
 
 // MUTEX CREATE
-mutex_t newMutex(){
+mutex_t newMutex(void){
 	mutex_t mutex;
 	mutex.count = 1;
 	mutex.waitList = NULL;
@@ -137,8 +138,9 @@ void mutexAcquire(mutex_t *mutex){	// Maybe make return type int so we know when
 	mutex->count-=1;
 	if(mutex->count == 0)
 		mutex->ownerId = running->taskId;
-	if(mutex->count < 0){
+	else if(mutex->count < 0){
 		// Block task that is trying to call wait (running task)
+		printf("Blocking task %d\n", running->taskId);
 		// first find tail of semaphore wait list
 		if(mutex->waitList == NULL){
 			mutex->waitList = running;
@@ -155,7 +157,7 @@ void mutexAcquire(mutex_t *mutex){	// Maybe make return type int so we know when
 		
 		// Implement Priority inheritance here: set the task that has the mutex to the same priority of this task. After setting setNewRunning, the mutex owner will hopefully run and release the mutex.
 		if(mutex->ownerId == running->taskId)	printf("ERROR: Mutex owner is trying to aquire mutex again");	// Sanity check, this shouldn't happen
-		if(running->priority > tcb[mutex->ownerId].priority){
+		if(running->taskPriority > tcb[mutex->ownerId].taskPriority){
 			// Upgrade the priority of the mutex owner TEMPORARILY (to the priority of the task currently being blocked or the priority of the highest priority task on the waitList? look at class notes)
 			printf("Upgrade Priority of task %d\n", mutex->ownerId);
 		}
@@ -166,7 +168,7 @@ void mutexAcquire(mutex_t *mutex){	// Maybe make return type int so we know when
 		setNewRunning = true;
 	}
 	else
-		printf("ERROR: mutex count was larger than one before decrementing\n")
+		printf("ERROR: mutex count was larger than one before decrementing\n");
 	__enable_irq();
 }
 
@@ -174,7 +176,7 @@ void mutexAcquire(mutex_t *mutex){	// Maybe make return type int so we know when
 int mutexRelease(mutex_t *mutex){
 	__disable_irq();
 	if(running->taskId != mutex->ownerId){
-		printf("running task is not the mutex owner, unable to release!\n")
+		printf("Running task is not the mutex owner, unable to release!\n");
 		__enable_irq();
 		return -1;	// Use this return value in application code somehow?
 	}
@@ -191,7 +193,7 @@ int mutexRelease(mutex_t *mutex){
 			mutex->ownerId = temp->taskId;
 		}		
 	}
-	else if(mutex->count = 1){
+	else if(mutex->count == 1){
 		// mutex is now ownerless
 		mutex->ownerId = -1;
 	}
@@ -253,6 +255,7 @@ void RtosInit(void){
 
 // CREATE TASK
 int CreateTask(rtosTaskFunc_t taskFunc, priority_t priority, void* funcArg){
+		__disable_irq();
 		printf("CREATING TASK... ");
     // assign new task to a tcb. How to tell if tcb is not already in use? check the tcb.taskState maybe
     for(int i=0; i<6; i++){
@@ -291,11 +294,13 @@ int CreateTask(rtosTaskFunc_t taskFunc, priority_t priority, void* funcArg){
             // Successful, return 0
 						//runnn the schedulerrr!!! set pendsv bit to 1. edit, 
 						printf("COMPLETED CREATING NEW TASK\n");
+						__enable_irq();
             return 0;
         }
     }
     // No tcbs available, unable to create task	
 		printf("FAILED CREATING NEW TASK\n");
+		__enable_irq();
     return -1;
 }
 

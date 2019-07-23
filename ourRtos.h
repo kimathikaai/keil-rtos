@@ -61,7 +61,7 @@ typedef struct{
 
 typedef struct{
 	int32_t count;
-	tcb* waitList;
+	tcb_t* waitList;
 	int16_t ownerId;
 }mutex_t;
 
@@ -76,6 +76,9 @@ bool set_running(tcb_t *tcb);
 sem_t newSem(int initialCount);
 void wait(sem_t* sem);
 void signal(sem_t * sem);
+mutex_t newMutex(void);
+void mutexAcquire(mutex_t *mutex);
+int mutexRelease(mutex_t *mutex);
 bool timeSliceDone(tcb_t *tcb);
 tcb_t * next_task(void);
 void update(void);

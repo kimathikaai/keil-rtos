@@ -18,5 +18,6 @@ int main(void){
 		//test_default();
 		//test_one();
 		//test_two(); 
-		test_three();
+		//test_three();
+		test_four();
 }

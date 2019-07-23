@@ -5,7 +5,7 @@
 <h2>Tool Versions:</h2>
 IDE-Version: µVision V5.24.2.0
 Copyright (C) 2017 ARM Ltd and ARM Germany GmbH. All rights reserved.
-License Information: Eric Praetzel, ECE Dept, LIC=----
+License Information: Eric Praetzel, `ECE Dept, LIC=----
  
 Tool Versions:
 Toolchain:       MDK-Lite  Version: 5.24.1
@@ -21,17 +21,26 @@ Target DLL:      UL2CM3.DLL V1.160.3.0
 Dialog DLL:      TCM.DLL V1.32.0.0
  
 <h2>Project:</h2>
-N:\TRON\2B\MTE241\keil-rtos\RTOS.uvprojx
-Project File Date:  07/21/2019
+N:\keil-rtos\RTOS.uvprojx
+Project File Date:  07/23/2019
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 5 (build 528)', folder: 'C:\Software\Keil_v5\ARM\ARMCC\Bin'
 Build target 'Target 1'
-compiling testSuite.c...
+compiling Retarget.c...
+compiling context.c...
 compiling main_default.c...
+compiling uart.c...
+assembling startup_LPC17xx.s...
+compiling ourRtos.c...
+compiling testSuite.c...
+testSuite.c(28): warning:  #177-D: variable "i"  was declared but never referenced
+  	uint32_t i = (uint32_t)arg;
+testSuite.c: 1 warning, 0 errors
+compiling system_LPC17xx.c...
 linking...
-Program Size: Code=4448 RO-data=304 RW-data=72 ZI-data=8608  
-".\Objects\RTOS.axf" - 0 Error(s), 0 Warning(s).
+Program Size: Code=5516 RO-data=452 RW-data=64 ZI-data=8624  
+".\Objects\RTOS.axf" - 0 Error(s), 1 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -57,9 +66,9 @@ Package Vendor: Keil
 
    * Component: Keil::Device:Startup:1.0.0
       Include file:  Device\Include\LPC17xx.h
+      Include file:  RTE_Driver\Config\RTE_Device.h
       Source file:   Device\Source\system_LPC17xx.c
       Source file:   Device\Source\ARM\startup_LPC17xx.s
-      Include file:  RTE_Driver\Config\RTE_Device.h
 
    * Component: ARM::CMSIS:CORE:5.1.1
 Build Time Elapsed:  00:00:01

@@ -10,14 +10,18 @@ extern sem_t semOne;
 ******************************************************************************/
 void function_one(void *arg);
 void function_two(void *arg);
+void function_three(void *arg);
+void function_four(void *arg);
+void function_five(void *arg);
 
 /*****************************************************************************
 **                           TASK INITIALIZATION
 ******************************************************************************/
 void test_default(void);
-void test_one(void);
-void test_two(void);
-void test_three(void);
+void test_one(void);	// context switching
+void test_two(void);	// FPP scheduling
+void test_three(void);	// blocking semaphores (also shows FPP)
+void test_four(void);	// Mutex with owner test on release
 
 #endif /* end __TESTSUITE_H */
 /*****************************************************************************
