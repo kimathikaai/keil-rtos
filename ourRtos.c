@@ -155,11 +155,25 @@ void mutexAcquire(mutex_t *mutex){	// Maybe make return type int so we know when
 		running->next = NULL;
 		running->taskState=Blocked;
 		
-		// Implement Priority inheritance here: set the task that has the mutex to the same priority of this task. After setting setNewRunning, the mutex owner will hopefully run and release the mutex.
+		// Implement Priority inheritance here: Upgrade priority of mutex-owning task. After setting setNewRunning, the mutex owner will hopefully run and release the mutex.
 		if(mutex->ownerId == running->taskId)	printf("ERROR: Mutex owner is trying to aquire mutex again");	// Sanity check, this shouldn't happen
 		if(running->taskPriority > tcb[mutex->ownerId].taskPriority){
 			// Upgrade the priority of the mutex owner TEMPORARILY (to the priority of the task currently being blocked or the priority of the highest priority task on the waitList? look at class notes)
 			printf("Upgrade Priority of task %d\n", mutex->ownerId);
+			int highestBlockedPriority = tcb[mutex->ownerId].taskPriority;
+			tcb_t * curr = mutex->waitList;
+			while(curr){	// Find highest priority in waitList
+				if(curr->taskPriority > highestBlockedPriority)
+					highestBlockedPriority = curr->taskPriority;
+				curr = curr->next;
+			}
+			// Remove the mutex owner from ready list and readd after at the correct priority level, at next systick that priority level should run
+			remove_from_readyList(&(tcb[mutex->ownerId]));
+			
+			tcb[mutex->ownerId].taskBasePriority = tcb[mutex->ownerId].taskPriority;
+			tcb[mutex->ownerId].taskPriority = highestBlockedPriority;
+			
+			add_to_readyList(&(tcb[mutex->ownerId]));
 		}
 		else
 			printf("Possible error: running task has lower priority than than the mutex-owning task");	// Probably shouldn't happen?
@@ -189,11 +203,15 @@ int mutexRelease(mutex_t *mutex){
 			tcb_t * temp = mutex->waitList;
 			mutex->waitList = mutex->waitList->next;
 			add_to_readyList(temp);
+			//	Set the priority of the mutex owner back to the base priority (might have been raised)
+			tcb[mutex->ownerId].taskPriority = tcb[mutex->ownerId].taskBasePriority;
 			// Set the newly unblocked task as the mutex owner
 			mutex->ownerId = temp->taskId;
-		}		
+		}
+		
 	}
 	else if(mutex->count == 1){
+		tcb[mutex->ownerId].taskPriority = tcb[mutex->ownerId].taskBasePriority;	// This line is probably redundant
 		// mutex is now ownerless
 		mutex->ownerId = -1;
 	}
@@ -223,6 +241,7 @@ void RtosInit(void){
         tcb[i].stackBaseAddress = stackAddresses[i];
         tcb[i].taskState = Inactive;
         tcb[i].taskPriority = Normal;
+				tcb[i].taskBasePriority = Normal;
 				tcb[i].time = 0;
     }
     
@@ -264,6 +283,7 @@ int CreateTask(rtosTaskFunc_t taskFunc, priority_t priority, void* funcArg){
 						// Assign task to tcb
             tcb[i].taskFunction = taskFunc;
             tcb[i].taskPriority = priority;
+						tcb[i].taskBasePriority = priority;
 						add_to_readyList(&tcb[i]); // Add task to the readyList
 					
             /*

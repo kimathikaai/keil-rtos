@@ -83,6 +83,7 @@ void function_four(void*arg){
 void function_five(void*arg){
 	bool triedReleasingMutex = false;
 	bool triedAcquiringMutex = false;
+	bool mutexReleased = false;
 	
 	while(true){
 		
@@ -104,13 +105,54 @@ void function_five(void*arg){
 			printf("OUTPUT: Mutex aquired (Task %d)\n", running->taskId);
 			triedAcquiringMutex = true;
 			__enable_irq();
+		}
+		
+		if(msTicks > 6000 && !mutexReleased){
+			__disable_irq();
+			printf("OUTPUT: Trying to release mutex (Task %d)\n", running->taskId);
+			if(mutexRelease(&mutexOne)==0)
+				printf("OUTPUT: Mutex released (Task %d)\n", running->taskId);
+			else
+				printf("OUTPUT: Unable to release mutex (Task %d)\n", running->taskId);
+			mutexReleased = true;
+			__enable_irq();
+		}			
+		
+		if(mutexOne.ownerId<0)	printf("FUNCTION TASK OUTPUT: (Task %d), mutex is unowned\n", running->taskId);
+		else	printf("FUNCTION TASK OUTPUT: (Task %d), task %d is the owner of the mutex\n", running->taskId, mutexOne.ownerId);
+	}
+}
+void function_six(void *arg){
+	bool task1Created = false;
+
+	while(true){		
+		if(msTicks > 3000 && !task1Created){
+			// Create task of higher priority that tries acquire mutex
+			CreateTask(&function_seven, (priority_t)5, (void *)1);
+			task1Created = true;
+		}
+		
+		if(mutexOne.ownerId<0)	printf("FUNCTION TASK OUTPUT: (Task %d), mutex is unowned\n", running->taskId);
+		else	printf("FUNCTION TASK OUTPUT: (Task %d), task %d is the owner of the mutex\n", running->taskId, mutexOne.ownerId);
+	}
+}
+void function_seven(void *arg){
+	bool triedAcquiringMutex = false;
+	
+	while(true){
+		if(msTicks > 4000 && !triedAcquiringMutex){
+			__disable_irq();
+			printf("OUTPUT: Trying to aqcuire mutex (Task %d)\n", running->taskId);
+			mutexAcquire(&mutexOne);
+			printf("OUTPUT: Mutex aquired (Task %d)\n", running->taskId);
+			triedAcquiringMutex = true;
+			__enable_irq();
 		}		
 		
 		if(mutexOne.ownerId<0)	printf("FUNCTION TASK OUTPUT: (Task %d), mutex is unowned\n", running->taskId);
 		else	printf("FUNCTION TASK OUTPUT: (Task %d), task %d is the owner of the mutex\n", running->taskId, mutexOne.ownerId);
 	}
 }
-
 
 /*****************************************************************************
 **                           TASK INITIALIZATION
@@ -200,6 +242,44 @@ void test_four(void){	// this test case doesn't really use the main task for tes
 	CreateTask(&function_four, (priority_t)4, (void *)0);
 	while(true){
 		printf("FUNCTION TASK OUTPUT: (Task %d)\n", 5);
+	}
+}
+void test_five(void){
+	bool mutexAcquired = false;
+	bool task0Created = false;
+	bool mutexReleased = false;
+	mutexOne = newMutex();
+
+	while(true){
+		
+		if(msTicks > 1000 && !mutexAcquired){
+			__disable_irq();
+			printf("OUTPUT: Trying to aqcuire mutex (Task %d)\n", running->taskId);
+			mutexAcquire(&mutexOne);
+			printf("OUTPUT: Mutex aquired (Task %d)\n", running->taskId);
+			mutexAcquired = true;
+			__enable_irq();
+		}			
+
+		if(msTicks > 2000 && !task0Created){
+			// Create task of higher priority that runs and then creates another task
+			CreateTask(&function_six, (priority_t)4, (void *)0);
+			task0Created = true;
+		}
+		
+		if(msTicks > 5000 && !mutexReleased){
+			__disable_irq();
+			printf("OUTPUT: Trying to release mutex (Task %d)\n", running->taskId);
+			if(mutexRelease(&mutexOne)==0)
+				printf("OUTPUT: Mutex released (Task %d)\n", running->taskId);
+			else
+				printf("OUTPUT: Unable to release mutex (Task %d)\n", running->taskId);
+			mutexReleased = true;
+			__enable_irq();
+		}
+		
+		if(mutexOne.ownerId<0)	printf("FUNCTION TASK OUTPUT: (Task %d), mutex is unowned\n", running->taskId);
+		else	printf("FUNCTION TASK OUTPUT: (Task %d), task %d is the owner of the mutex\n", running->taskId, mutexOne.ownerId);
 	}
 }
 

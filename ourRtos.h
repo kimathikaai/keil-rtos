@@ -46,6 +46,7 @@ typedef struct tcb_s{
     rtosTaskFunc_t taskFunction;
     state_t taskState;
     priority_t taskPriority;
+		priority_t taskBasePriority;	// Used for mutex priority inheritance
     struct tcb_s *next;
     int time;
 }tcb_t;
