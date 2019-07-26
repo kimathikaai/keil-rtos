@@ -22,26 +22,50 @@ void function_two(void *arg){
 	}	
 }
 
+bool one = false;
+bool two = false;
+
 void function_three(void *arg){
-	bool semAcquired = false;
-	bool task1Created = false;
+//	bool semAcquired = false;
+//	bool task1Created = false;
 	uint32_t i = (uint32_t)arg;
 	
 	while(1){
-		if(msTicks > 3000 && !semAcquired){
-			printf("OUTPUT: Trying to aqcuire semaphore (Task %d)\n", arg);
+		if(msTicks > 3000 && !one){
+			printf("OUTPUT: Trying to aqcuire semaphore (Task %d)\n", running->taskId);
 			wait(&semOne);
-			semAcquired = true;
+			one = true;
 		}
 		
-		if(msTicks > 6000 && !task1Created){
+		if(msTicks > 6000 && !two){
 			CreateTask(&function_one, (priority_t)4, (void *)1);
-			task1Created = true;
+			two = true;
 		}
 		
-		printf("FUNCTION TASK OUTPUT: (Task %d)\n", arg);
+		printf("FUNCTION TASK OUTPUT: (Task %d)\n", running->taskId);
 	}	
 }
+//void function_three(void *arg){
+//	bool semAcquired = false;
+//	bool task1Created = false;
+//	uint32_t i = (uint32_t)arg;
+//	
+//	while(1){
+//		if(msTicks > 3000 && !semAcquired){
+//			printf("OUTPUT: Trying to aqcuire semaphore (Task %d)\n", i);
+//			mutexAcquire(&mutexOne);
+//			semAcquired = true;
+//		}
+//		
+//		if(msTicks > 6000 && !task1Created){
+//			CreateTask(&function_one, (priority_t)4, (void *)1);
+//			task1Created = true;
+//		}
+//		
+//		printf("FUNCTION TASK OUTPUT: (Task %d)\n", i);
+//	}	
+//}
+
 void function_four(void*arg){
 	bool mutexAcquired = false;
 	bool task1Created = false;
@@ -237,6 +261,34 @@ void test_three(void){
 		printf("FUNCTION TASK OUTPUT: (Task %d)\n", 5);
 	}
 }
+
+//void test_three(void){
+//	bool task0Created = false;
+//	bool semReleased = false;
+//	mutexOne = newMutex();
+//	
+//	printf("OUTPUT: Trying to aqcuire semaphore (Task %d)\n", 5);
+//	mutexAcquire(&mutexOne);
+//	printf("OUTPUT: Semaphore aquired (Task %d)\n", 5);	
+
+//	while(true){
+
+//		if(msTicks > 2000 && !task0Created){
+//			// Create task of higher priority that tries to aquire semaphore
+//			CreateTask(&function_three, (priority_t)4, (void *)0);
+//			task0Created = true;
+//		}
+//		
+//		if(msTicks > 4000 && !semReleased){
+//			printf("OUTPUT: Signal sempaphore (Task %d)\n", 5);	
+//			mutexRelease(&mutexOne);
+//			semReleased = true;
+//		}
+//		
+//		printf("FUNCTION TASK OUTPUT: (Task %d)\n", 5);
+//	}
+//}
+
 
 void test_four(void){	// this test case doesn't really use the main task for testing
 	CreateTask(&function_four, (priority_t)4, (void *)0);

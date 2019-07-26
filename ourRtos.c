@@ -141,7 +141,7 @@ void mutexAcquire(mutex_t *mutex){	// Maybe make return type int so we know when
 	else if(mutex->count < 0){
 		// Block task that is trying to call wait (running task)
 		printf("Blocking task %d\n", running->taskId);
-		// first find tail of semaphore wait list
+		// first find tail of mutex wait list
 		if(mutex->waitList == NULL){
 			mutex->waitList = running;
 		}
