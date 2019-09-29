@@ -11,20 +11,6 @@ Real Time Operating System for Keil development board with Arm Cortex M3 MCU.
 * Mutexes with priority inheritance
 * Blocking Semaphores
 
-Understand **ROS ecosystems**- Topics, nodes, messages, services, actionlib 
-* Understand how position and orientation are represented in ROS
-* Develop simple **computer vision programs** with ROS and **OpenCV**
-    * Pixels and image structure (python)
-    * Image encoding (python)
-    * Video streams input (python)
-    * Drawing shapes
-    * Integrating OpenCV and ROS
-    * Adaptive thresholding
-    * Color filtering
-    * Contours detection and processing
-* Develop simple application to control **robot motion**
-* Learn how to structure a C++/Python ROS project
-
 ## Subdirectories
 *Needs refactoring*
  
