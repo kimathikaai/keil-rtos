@@ -1,5 +1,5 @@
-# CMSIS Based Real-Time Operating System
-Real Time Operating System for Keil development board with Arm Cortex M3 MCU.
+# CMSIS Based Real-Time Kernel
+Real Time Kernel for Keil development board with Arm Cortex M3 MCU.
 
 ## Setup
 * Keil MCB 1700 evaluation board with LPC1768 MCU
