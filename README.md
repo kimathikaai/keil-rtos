@@ -1,6 +1,10 @@
 # CMSIS Based Real-Time Kernel
 Real Time Kernel for Keil development board with Arm Cortex M3 MCU.
 
+## Acknowledgments
+* Worked to complete this project with my great partner William Li
+* CMSIS Documentation '[Software Interface](http://www.keil.com/pack/doc/CMSIS/General/html/index.html)'
+
 ## Setup
 * Keil MCB 1700 evaluation board with LPC1768 MCU
 * uVision5 IDE
@@ -13,7 +17,4 @@ Real Time Kernel for Keil development board with Arm Cortex M3 MCU.
 
 ## Subdirectories
 *Needs refactoring*
- 
-## Acknowledgments
-* Worked to complete this project with my great partner William Li
-* CMSIS Documentation '[Software Interface](http://www.keil.com/pack/doc/CMSIS/General/html/index.html)'
+
